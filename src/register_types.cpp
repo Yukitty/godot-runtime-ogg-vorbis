@@ -1,17 +1,21 @@
-#include "register_types.h"
 #include <gdextension_interface.h>
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/core/defs.hpp>
 #include <godot_cpp/godot.hpp>
-
+#include <godot_cpp/classes/resource_loader.hpp>
 using namespace godot;
+
+#include "register_types.h"
+#include "resource_loader_ogg_vorbis.h"
 
 void initialize_gdextension_types(ModuleInitializationLevel p_level)
 {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-	//ClassDB::register_class<YourClass>();
+	Ref<ResourceLoaderOggVorbis> ogg_vorbis_loader;
+	ogg_vorbis_loader.instantiate();
+	ResourceLoader::get_singleton()->add_resource_format_loader(ogg_vorbis_loader);
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
