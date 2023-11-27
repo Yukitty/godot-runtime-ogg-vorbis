@@ -11,7 +11,7 @@ def validate_parent_dir(key, val, env):
         raise UserError("'%s' is not a directory: %s" % (key, os.path.dirname(val)))
 
 
-libname = "EXTENSION-NAME"
+libname = "runtimeogg"
 projectdir = "demo"
 
 localEnv = Environment(tools=["default"], PLATFORM="")
@@ -65,16 +65,7 @@ library = env.SharedLibrary(
     source=sources,
 )
 
-
-def copy_bin_to_projectdir(target, source, env):
-    import shutil
-
-    targetfrom = "bin/{}/lib{}".format(env["platform"], file)
-    targetdest = "{}/bin/{}/lib{}".format(projectdir, env["platform"], file)
-    shutil.copyfile(targetfrom, targetdest)
-
-
-copy = env.Command(libraryfile, None, copy_bin_to_projectdir)
+copy = env.InstallAs("{}/bin/{}/lib{}".format(projectdir, env["platform"], file), library)
 
 default_args = [library, copy]
 if localEnv.get("compiledb", False):
