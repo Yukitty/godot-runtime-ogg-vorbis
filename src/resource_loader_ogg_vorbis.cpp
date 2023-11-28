@@ -12,7 +12,10 @@ using namespace godot;
 #include "resource_loader_ogg_vorbis.h"
 
 #include <ogg/ogg.h>
-#include <vorbis/codec.h>
+//#include <vorbis/codec.h>
+#include "vorbis_min.h"
+
+ResourceLoaderOggVorbis *ResourceLoaderOggVorbis::singleton = nullptr;
 
 // Basically a copy of ResourceImporterOggVorbis::import_ogg_vorbis
 Ref<Resource> ResourceLoaderOggVorbis::load(const String &p_path, const String &p_original_path, Error *r_error, bool p_use_sub_threads, float *r_progress, CacheMode p_cache_mode) {
@@ -145,11 +148,10 @@ Ref<Resource> ResourceLoaderOggVorbis::load(const String &p_path, const String &
 	ogg_vorbis_stream->set_packet_sequence(ogg_packet_sequence);
 	ogg_vorbis_stream->set_loop(false);
 
+	if (r_error) {
+		*r_error = OK;
+	}
 	return ogg_vorbis_stream;
-}
-
-void ResourceLoaderOggVorbis::get_recognized_extensions_for_type(const String &p_type, List<String> *p_extensions) const {
-	get_recognized_extensions(p_extensions);
 }
 
 void ResourceLoaderOggVorbis::get_recognized_extensions(List<String> *p_extensions) const {
@@ -158,43 +160,14 @@ void ResourceLoaderOggVorbis::get_recognized_extensions(List<String> *p_extensio
 }
 
 bool ResourceLoaderOggVorbis::handles_type(const String &p_type) const {
-	// TODO
-	return true;
-}
-
-void ResourceLoaderOggVorbis::get_classes_used(const String &p_path, HashSet<StringName> *r_classes) {
-	r_classes->insert("AudioStreamOggVorbis");
+	return p_type == "AudioStreamOggVorbis";
 }
 
 String ResourceLoaderOggVorbis::get_resource_type(const String &p_path) const {
 	String ext = p_path.get_extension().to_lower();
-	if (ext != "ogg" && ext != "oga") {
-		return String();
+	if (ext == "ogg" || ext == "oga") {
+		return "AudioStreamOggVorbis";
 	}
-	return "AudioStreamOggVorbis";
+	return String();
 }
-
-String ResourceLoaderOggVorbis::get_resource_script_class(const String &p_path) const {
-	String ext = p_path.get_extension().to_lower();
-	if (ext != "ogg" && ext != "oga") {
-		return String();
-	}
-	return "AudioStreamOggVorbis";
-}
-
-int64_t ResourceLoaderOggVorbis::get_resource_uid(const String &p_path) const {
-	// TODO
-	return ResourceUID::INVALID_ID;
-}
-
-void ResourceLoaderOggVorbis::get_dependencies(const String &p_path, List<String> *p_dependencies, bool p_add_types) {
-	// No dependencies.
-}
-
-Error ResourceLoaderOggVorbis::rename_dependencies(const String &p_path, const HashMap<String, String> &p_map) {
-	// No dependencies.
-	return OK;
-}
-
-ResourceLoaderOggVorbis *ResourceLoaderOggVorbis::singleton = nullptr;
 

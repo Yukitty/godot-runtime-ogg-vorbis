@@ -2,3 +2,6 @@
 	path = godot-cpp
 	url = https://github.com/godotengine/godot-cpp.git
 	branch = 4.0
+[submodule "libogg"]
+	path = libogg
+	url = https://gitlab.xiph.org/xiph/ogg.git
