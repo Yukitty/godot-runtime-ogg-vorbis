@@ -5,7 +5,6 @@
 #include <godot_cpp/templates/vector.hpp>
 #include <godot_cpp/classes/file_access.hpp>
 #include <godot_cpp/classes/resource_uid.hpp>
-#include <godot_cpp/classes/audio_stream_ogg_vorbis.hpp>
 #include <godot_cpp/classes/ogg_packet_sequence.hpp>
 using namespace godot;
 
@@ -15,25 +14,28 @@ using namespace godot;
 //#include <vorbis/codec.h>
 #include "vorbis_min.h"
 
-ResourceLoaderOggVorbis *ResourceLoaderOggVorbis::singleton = nullptr;
+void ResourceLoaderOggVorbis::_bind_methods() {
+	ClassDB::bind_static_method("ResourceLoaderOggVorbis", D_METHOD("load", "path"), &ResourceLoaderOggVorbis::load);
+	ClassDB::bind_static_method("ResourceLoaderOggVorbis", D_METHOD("load_buffer", "buffer"), &ResourceLoaderOggVorbis::load_buffer);
+}
 
-// Basically a copy of ResourceImporterOggVorbis::import_ogg_vorbis
-Ref<Resource> ResourceLoaderOggVorbis::load(const String &p_path, const String &p_original_path, Error *r_error, bool p_use_sub_threads, float *r_progress, CacheMode p_cache_mode) {
-	if (r_error) {
-		*r_error = ERR_CANT_OPEN;
-	}
-
+Ref<AudioStreamOggVorbis> ResourceLoaderOggVorbis::load(const String &p_path) {
 	Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::READ);
-	ERR_FAIL_COND_V_MSG(f.is_null(), Ref<Resource>(), "Cannot open file '" + p_path + "'.");
+	ERR_FAIL_COND_V_MSG(f.is_null(), Ref<AudioStreamOggVorbis>(), "Cannot open file '" + p_path + "'.");
 
 	uint64_t len = f->get_length();
 
-	Vector<uint8_t> file_data;
+	PackedByteArray file_data;
 	file_data.resize(len);
 	uint8_t *w = file_data.ptrw();
 
 	f->get_buffer(w, len);
+	return load_buffer(file_data);
+}
 
+// Basically a copy of ResourceImporterOggVorbis::import_ogg_vorbis but for PackedByteArray.
+Ref<AudioStreamOggVorbis> ResourceLoaderOggVorbis::load_buffer(const PackedByteArray &buffer) {
+	uint64_t len = buffer.size();
 	Ref<AudioStreamOggVorbis> ogg_vorbis_stream;
 	ogg_vorbis_stream.instantiate();
 
@@ -71,7 +73,7 @@ Ref<Resource> ResourceLoaderOggVorbis::load(const String &p_path, const String &
 			if (copy_size > OGG_SYNC_BUFFER_SIZE) {
 				copy_size = OGG_SYNC_BUFFER_SIZE;
 			}
-			memcpy(sync_buf, &file_data[cursor], copy_size);
+			memcpy(sync_buf, &buffer[cursor], copy_size);
 			ogg_sync_wrote(&sync_state, copy_size);
 			cursor += copy_size;
 			err = ogg_sync_check(&sync_state);
@@ -148,26 +150,6 @@ Ref<Resource> ResourceLoaderOggVorbis::load(const String &p_path, const String &
 	ogg_vorbis_stream->set_packet_sequence(ogg_packet_sequence);
 	ogg_vorbis_stream->set_loop(false);
 
-	if (r_error) {
-		*r_error = OK;
-	}
 	return ogg_vorbis_stream;
-}
-
-void ResourceLoaderOggVorbis::get_recognized_extensions(List<String> *p_extensions) const {
-	p_extensions->push_back("ogg");
-	p_extensions->push_back("oga");
-}
-
-bool ResourceLoaderOggVorbis::handles_type(const String &p_type) const {
-	return p_type == "AudioStreamOggVorbis";
-}
-
-String ResourceLoaderOggVorbis::get_resource_type(const String &p_path) const {
-	String ext = p_path.get_extension().to_lower();
-	if (ext == "ogg" || ext == "oga") {
-		return "AudioStreamOggVorbis";
-	}
-	return String();
 }
 

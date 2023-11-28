@@ -8,24 +8,18 @@ using namespace godot;
 #include "register_types.h"
 #include "resource_loader_ogg_vorbis.h"
 
-static Ref<ResourceLoaderOggVorbis> ogg_vorbis_loader;
-
 void initialize_gdextension_types(ModuleInitializationLevel p_level)
 {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-	//ClassDB::register_class<ResourceLoaderOggVorbis>();
-	ogg_vorbis_loader.instantiate();
-	ResourceLoader::get_singleton()->add_resource_format_loader(ogg_vorbis_loader, true);
+	ClassDB::register_class<ResourceLoaderOggVorbis>();
 }
 
 void uninitialize_gdextension_types(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-	ResourceLoader::get_singleton()->remove_resource_format_loader(ogg_vorbis_loader);
-	ogg_vorbis_loader.unref();
 }
 
 extern "C"

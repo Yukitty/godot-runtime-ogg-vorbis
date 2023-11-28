@@ -1,25 +1,19 @@
 #pragma once
 
-#include <godot_cpp/classes/resource_format_loader.hpp>
-#include <godot_cpp/classes/resource.hpp>
-#include <godot_cpp/templates/hash_set.hpp>
+#include <godot_cpp/classes/audio_stream_ogg_vorbis.hpp>
 
-class ResourceLoaderOggVorbis : public ResourceFormatLoader {
+class ResourceLoaderOggVorbis : public Object {
+	GDCLASS(ResourceLoaderOggVorbis, Object);
+
 	enum {
 		OGG_SYNC_BUFFER_SIZE = 8192,
 	};
 
 protected:
-	static ResourceLoaderOggVorbis *singleton;
+	static void _bind_methods();
 
 public:
-	static ResourceLoaderOggVorbis *get_singleton() { return singleton; }
-
-	virtual Ref<Resource> load(const String &p_path, const String &p_original_path = "", Error *r_error = nullptr, bool p_use_sub_threads = false, float *r_progress = nullptr, CacheMode p_cache_mode = CACHE_MODE_REUSE);
-	virtual void get_recognized_extensions(List<String> *p_extensions) const;
-	virtual bool handles_type(const String &p_type) const;
-	virtual String get_resource_type(const String &p_path) const;
-
-	ResourceLoaderOggVorbis() { singleton = this;  }
+	static Ref<AudioStreamOggVorbis> load(const String &p_path);
+	static Ref<AudioStreamOggVorbis> load_buffer(const PackedByteArray &buffer);
 };
 
